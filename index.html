@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+ <head>
+ 	<title>ScenePT Demoilta#7 - 6 December 2014</title>
+	<meta charset="UTF-8">
+ 	<style>
+ 	@font-face {
+		font-family: 'Neuropol';
+		src: url('NEUROPOL.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+	}
+
+ 	@font-face {
+		font-family: 'PMarker';
+		src: url('PermanentMarker.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+	}
+	
+	body {
+		/*background: url('gloomy-stripes-dark-background-tile.jpg');*/
+		overflow: hidden;
+		padding: 0px;
+		margin: 0px;
+	}
+ 	.aligncenter {
+ 		position: absolute;
+ 		top: 0px;
+ 		width: 100%;
+ 		text-align: center;
+ 		margin: auto;
+ 	}
+ 	
+	#message {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		font-family: 'PMarker';
+		color: #fff;
+		width: 100%;
+		height: 100%;
+		margin: auto;
+		text-align: center;
+		font-size: 35px;
+		overflow-y: hidden;
+		text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+		line-height: 2em;
+	}
+	
+	#message span {
+		position: relative;
+		top: 35%;
+		transform: translateY(-50%);
+	}
+	
+	@-webkit-keyframes fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.fade-in {
+		opacity: 0;
+		-webkit-animation-name: fade-in;
+		-webkit-animation-duration: 6s;
+		-webkit-animation-timing-function: ease;
+		-webkit-animation-iteration-count: 2;
+		-webkit-animation-direction: alternate;
+	}
+
+ 	</style>
+	<script src="requestanimationframe.js"></script>
+  	<script type="application/javascript">
+
+rand = function(n){
+	return Math.floor(Math.random()*n);
+};
+
+var rms = 0;
+
+var is_chrome;
+
+function init() {
+	
+	is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+    
+	var context;
+
+	try {
+		// Fix up for prefixing
+		window.AudioContext = window.AudioContext||window.webkitAudioContext;
+		context = new AudioContext();
+
+		/*context.onaudioprocess = function(evt){
+			var input = evt.inputBuffer.getChannelData(0)
+			  , len = input.length   
+			  , total = i = 0
+			  , rms;
+			while ( i < len ) total += Math.abs( input[i++] );
+			rms = Math.sqrt( total / len );
+			//meter.style.width = ( rms * 100 ) + '%';
+			console.log(rms);
+		}*/
+
+		var request = new XMLHttpRequest();
+		request.open('GET', 'kahvi161c_esem-spider_boat_fisherman_loudspeaker_flash.ogg', true);
+		request.responseType = 'arraybuffer';
+		console.log('requesting');
+
+		// Decode asynchronously
+		request.onload = function() {
+			context.decodeAudioData(request.response, function(buffer) {
+	  
+				backgroundAudio = context.createBufferSource(); 	// creates a sound source
+				backgroundAudio.buffer = buffer;                    // tell the source which sound to play
+				backgroundAudio.connect(context.destination);       // connect the source to the context's destination (the speakers)
+				backgroundAudio.loop = true;
+				backgroundAudio.start(0);
+	  
+				var levelChecker = context.createScriptProcessor(0, 2, 2);
+				backgroundAudio.connect(levelChecker);
+				levelChecker.connect(context.destination);
+				//console.log('connecting');
+
+				levelChecker.onaudioprocess = process;
+	
+			
+				// start canvas
+				drawCanvas();
+	  
+				console.log('decoded');
+
+	  
+			}, function(evt) { console.log('failed to load buffer'); });
+		}
+		request.send();
+
+	} catch(e) {
+		console.log('Web Audio API is not supported in this browser');
+	}
+
+}
+
+var process = function(e) {
+	//console.log('we are here');
+	var buffer = e.inputBuffer.getChannelData(0);
+	var len = buffer.length; 
+	var total = 0;
+	var i = 0;
+	
+	while ( i < len ) total += Math.abs( buffer[i++] )
+	
+	//console.log(total/len);
+	rms = (rms + Math.sqrt( total / len )) * 0.5;
+	//rms = 1.0;
+}
+
+var w;
+var h;
+var ctx;
+
+function drawCanvas() {
+
+	resize();
+
+	var num = 45;
+	var angle = (Math.PI*2)/num;
+	var size = 50;
+	var opening, phase1, phase2;
+	var maxj = 10;
+
+	function drawThis() {
+		var d = new Date();
+		var timer = d.getTime();
+		
+		phase1 = timer/25000;
+		phase2 = timer/2500;
+		
+		for (var j=maxj*0.5; j<maxj; j++) {
+		
+			var posX = w*(0.5) + Math.sin(phase2*0.25)*j*10;
+			var posY = h*(0.5) - Math.cos(phase2*0.25)*j*10;
+		
+			var thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
+			color = "rgba("+(105-thisb)+",30,"+(205-thisb)+","+(0.12*((maxj-j)/maxj)+rms*0.25)+")";
+			ctx.fillStyle = color;
+			var i = parseInt(((Math.sin(phase1) - Math.sin(phase2))+1.0)*0.5*num*0.33,10);
+			opening = Math.sin(i*angle)*10 + j*20;
+			ctx.save();
+			ctx.translate( posX+Math.sin(i*angle+phase1)*opening, posY+Math.cos(i*angle+phase1)*opening );
+			ctx.rotate(i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3);
+			ctx.beginPath();
+			ctx.moveTo(-size*.5*j,-size*.5*j);
+			ctx.lineTo(0,size);
+			ctx.lineTo(size*.5*j,-size*.5*j);
+			ctx.fill();
+			ctx.closePath();
+			ctx.restore();
+			
+			
+			thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
+			color = "rgba("+(205-thisb)+","+(105-thisb)+",30,"+(0.12*((maxj-j)/maxj)+rms*0.25)+")";
+			ctx.fillStyle = color;
+			i = parseInt(((Math.sin(phase1) - Math.sin(phase2))+1.0)*0.5*num*0.66,10);
+			opening = Math.sin(i*angle)*10 + j*20;
+			ctx.save();
+			ctx.translate( posX+Math.sin(i*angle+phase1)*opening, posY+Math.cos(i*angle+phase1)*opening );
+			ctx.rotate(i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3);
+			ctx.beginPath();
+			ctx.moveTo(-size*.5*j,-size*.5*j);
+			ctx.lineTo(0,size);
+			ctx.lineTo(size*.5*j,-size*.5*j);
+			ctx.fill();
+			ctx.closePath();
+			ctx.restore();
+			
+			
+			thisb = parseInt(Math.sin(phase2*0.5 + j)*35+120, 10);
+			color = "rgba("+(105-thisb)+","+(205-thisb)+",30,"+(0.12*((maxj-j)/maxj)+rms*0.25)+")";
+			ctx.fillStyle = color;
+			i = num-parseInt(((Math.sin(phase1) - Math.sin(phase2))+1.0)*0.5*num,10);
+			opening = Math.sin(i*angle)*10 + j*20;
+			ctx.save();
+			ctx.translate( posX+Math.sin(i*angle+phase1)*opening, posY+Math.cos(i*angle+phase1)*opening );
+			ctx.rotate(i*angle+Math.sin(phase2+Math.sin(i*angle)+j*0.5)*3);
+			ctx.beginPath();
+			ctx.moveTo(-size*.5*j,-size*.5*j);
+			ctx.lineTo(0,size);
+			ctx.lineTo(size*.5*j,-size*.5*j);
+			ctx.fill();
+			ctx.closePath();
+			ctx.restore();
+			
+		}
+		
+	}
+	
+	requestAnimationFrame( animate );
+	
+	document.getElementById('message').innerHTML = '';
+	setTimeout("startText()",5000);
+	
+	var d = new Date();
+	var n = d.getTime();
+	var scrollvalue = 0;
+
+	function animate() {
+		requestAnimationFrame( animate );
+		ctx.clearRect(0,0,w,h);
+		drawThis();
+	}
+}
+
+window.onresize = resize;
+
+function resize() {
+	w = window.innerWidth;
+	h = window.innerHeight;
+	
+	var canvas = document.getElementById("canvas");
+	canvas.setAttribute("width", w);
+	canvas.setAttribute("height", h);
+	
+	ctx = canvas.getContext("2d");
+	ctx.width = w;
+	ctx.height = h;
+}
+
+function startText() {
+	loadFirstScreen();
+	var timerloop = 15;
+	setTimeout("loadSecondScreen()",timerloop*1000);	
+	setTimeout("loadThirdScreen()",timerloop*2000); 	
+	setTimeout("loadFourthScreen()",timerloop*3000);
+	setTimeout("loadFifthScreen()",timerloop*4000);
+	setTimeout("startText()",timerloop*5000);
+}
+
+function loadFirstScreen() {
+  	var content = '';
+	thisclass = '';
+	if (is_chrome) thisclass='class="fade-in"';
+ 	content += '<span '+thisclass+'>Atencao demoscene Lisboeta!</span><br />';
+ 	content += '<span '+thisclass+'>nao sei porque raio tenho andado a escrever isto em ingles</span><br />';
+ 	content += '<span '+thisclass+'>pode ser que em portugues ate entendam melhor</span>';
+ 	document.getElementById('message').innerHTML = content;
+}
+ 
+function loadSecondScreen() {
+  	var content = '';
+ 	content += '<span '+thisclass+'>dia 6 de Dezembro as 14:30</span><br />';
+ 	content += '<span '+thisclass+'>vamos ver as demos de novembro e beber umas jolas</span><br />';
+ 	content += '<span '+thisclass+'>por isso toca de aparecer no Monte da Caparica</span><br />';
+ 	document.getElementById('message').innerHTML = content;
+}
+
+function loadThirdScreen() {
+  	var content = '';
+ 	content += '<span '+thisclass+'>beber nao e obrigatorio</span><br />';
+ 	content += '<span '+thisclass+'>mas para entrar tem de doar superbock ao organizador</span><br />';
+ 	content += '<span '+thisclass+'>aparecam!</span>';
+ 	document.getElementById('message').innerHTML = content;
+}
+
+function loadFourthScreen() {
+  	var content = '';
+ 	content += '<span '+thisclass+'>escritorio da Artica no Monte da Caparica</span><br />';
+ 	content += '<span '+thisclass+'>Madan Parque / FCT Edificio 6</span><br />';
+ 	document.getElementById('message').innerHTML = content;
+}
+
+function loadFifthScreen() {
+  	var content = '';
+ 	content += '<span '+thisclass+'>codigo de ps / TPOLM</span><br />';
+ 	content += '<span '+thisclass+'>musica de esem / TPOLM</span><br />';
+ 	content += '<span '+thisclass+'></span><br />';
+ 	content += '<span '+thisclass+'>ja agora um pirete poshaters da pouet!</span><br />';
+ 	document.getElementById('message').innerHTML = content;
+}
+
+  </script>
+ </head>
+ <body onload="init()">
+ 	<div class="aligncenter">
+   		<canvas id="canvas" width="800" height="600"></canvas>
+   		<!--<div id="message">Loading the ultraworld with awesomesauce...</div>-->
+		<div id="message">Carregando o multiverso com molho de salsa...</div>
+   	</div>
+ </body>
+</html>
