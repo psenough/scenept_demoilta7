@@ -1,76 +1,77 @@
 <!DOCTYPE html>
 <html>
  <head>
- 	<title>ScenePT Demoilta#7 - 6 December 2014</title>
+ 	<title>ScenePT Demoilta#7 - 6 Dezembro 2014</title>
 	<meta charset="UTF-8">
  	<style>
- 	@font-face {
-		font-family: 'Neuropol';
-		src: url('NEUROPOL.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-	}
 
- 	@font-face {
-		font-family: 'PMarker';
-		src: url('PermanentMarker.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-	}
-	
-	body {
-		/*background: url('gloomy-stripes-dark-background-tile.jpg');*/
-		overflow: hidden;
-		padding: 0px;
-		margin: 0px;
-	}
- 	.aligncenter {
- 		position: absolute;
- 		top: 0px;
- 		width: 100%;
- 		text-align: center;
- 		margin: auto;
- 	}
- 	
-	#message {
-		position: absolute;
-		top: 0px;
-		left: 0px;
-		font-family: 'PMarker';
-		color: #fff;
-		width: 100%;
-		height: 100%;
-		margin: auto;
-		text-align: center;
-		font-size: 35px;
-		overflow-y: hidden;
-		text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-		line-height: 2em;
-	}
-	
-	#message span {
-		position: relative;
-		top: 35%;
-		transform: translateY(-50%);
-	}
-	
-	@-webkit-keyframes fade-in {
-		0% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 1;
-		}
-	}
+@font-face {
+	font-family: 'Neuropol';
+	src: url('NEUROPOL.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
 
-	.fade-in {
+@font-face {
+	font-family: 'PMarker';
+	src: url('PermanentMarker.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	/*background: url('gloomy-stripes-dark-background-tile.jpg');*/
+	overflow: hidden;
+	padding: 0px;
+	margin: 0px;
+}
+.aligncenter {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	text-align: center;
+	margin: auto;
+}
+
+#message {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	font-family: 'PMarker';
+	color: #fff;
+	width: 100%;
+	height: 100%;
+	margin: auto;
+	text-align: center;
+	font-size: 35px;
+	overflow-y: hidden;
+	text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+	line-height: 2em;
+}
+
+#message span {
+	position: relative;
+	top: 35%;
+	transform: translateY(-50%);
+}
+
+@-webkit-keyframes fade-in {
+	0% {
 		opacity: 0;
-		-webkit-animation-name: fade-in;
-		-webkit-animation-duration: 6s;
-		-webkit-animation-timing-function: ease;
-		-webkit-animation-iteration-count: 2;
-		-webkit-animation-direction: alternate;
 	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.fade-in {
+	opacity: 0;
+	-webkit-animation-name: fade-in;
+	-webkit-animation-duration: 6s;
+	-webkit-animation-timing-function: ease;
+	-webkit-animation-iteration-count: 2;
+	-webkit-animation-direction: alternate;
+}
 
  	</style>
 	<script src="requestanimationframe.js"></script>
@@ -95,17 +96,6 @@ function init() {
 		window.AudioContext = window.AudioContext||window.webkitAudioContext;
 		context = new AudioContext();
 
-		/*context.onaudioprocess = function(evt){
-			var input = evt.inputBuffer.getChannelData(0)
-			  , len = input.length   
-			  , total = i = 0
-			  , rms;
-			while ( i < len ) total += Math.abs( input[i++] );
-			rms = Math.sqrt( total / len );
-			//meter.style.width = ( rms * 100 ) + '%';
-			console.log(rms);
-		}*/
-
 		var request = new XMLHttpRequest();
 		request.open('GET', 'kahvi161c_esem-spider_boat_fisherman_loudspeaker_flash.ogg', true);
 		request.responseType = 'arraybuffer';
@@ -127,7 +117,6 @@ function init() {
 				//console.log('connecting');
 
 				levelChecker.onaudioprocess = process;
-	
 			
 				// start canvas
 				drawCanvas();
@@ -141,22 +130,20 @@ function init() {
 
 	} catch(e) {
 		console.log('Web Audio API is not supported in this browser');
+		drawCanvas();
 	}
 
 }
 
 var process = function(e) {
-	//console.log('we are here');
 	var buffer = e.inputBuffer.getChannelData(0);
 	var len = buffer.length; 
 	var total = 0;
 	var i = 0;
 	
-	while ( i < len ) total += Math.abs( buffer[i++] )
+	while ( i < len ) total += Math.abs( buffer[i++] );
 	
-	//console.log(total/len);
 	rms = (rms + Math.sqrt( total / len )) * 0.5;
-	//rms = 1.0;
 }
 
 var w;
@@ -316,8 +303,7 @@ function loadFourthScreen() {
 function loadFifthScreen() {
   	var content = '';
  	content += '<span '+thisclass+'>codigo de ps / TPOLM</span><br />';
- 	content += '<span '+thisclass+'>musica de esem / TPOLM</span><br />';
- 	content += '<span '+thisclass+'></span><br />';
+ 	content += '<span '+thisclass+'>musica de esem / TPOLM</span><br /><br />';
  	content += '<span '+thisclass+'>ja agora um pirete poshaters da pouet!</span><br />';
  	document.getElementById('message').innerHTML = content;
 }
