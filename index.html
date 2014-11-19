@@ -83,12 +83,15 @@ rand = function(n){
 
 var rms = 0;
 
-var is_chrome;
+var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+//var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+//var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+//var is_opera = navigator.userAgent.indexOf("Presto") > -1;
+if ((is_chrome)&&(is_safari)) {is_safari=false;}
 
 function init() {
-	
-	is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-    
+	    
 	var context;
 
 	try {
@@ -97,7 +100,8 @@ function init() {
 		context = new AudioContext();
 
 		var request = new XMLHttpRequest();
-		request.open('GET', 'kahvi161c_esem-spider_boat_fisherman_loudspeaker_flash.ogg', true);
+		if (is_safari) request.open('GET', 'kahvi161c_esem-spider_boat_fisherman_loudspeaker_flash.m4a', true);
+			else request.open('GET', 'kahvi161c_esem-spider_boat_fisherman_loudspeaker_flash.ogg', true);
 		request.responseType = 'arraybuffer';
 		console.log('requesting');
 
@@ -111,7 +115,7 @@ function init() {
 				backgroundAudio.loop = true;
 				backgroundAudio.start(0);
 	  
-				var levelChecker = context.createScriptProcessor(0, 2, 2);
+				var levelChecker = context.createScriptProcessor(1024, 2, 2);
 				backgroundAudio.connect(levelChecker);
 				levelChecker.connect(context.destination);
 				//console.log('connecting');
@@ -124,7 +128,10 @@ function init() {
 				console.log('decoded');
 
 	  
-			}, function(evt) { console.log('failed to load buffer'); });
+			}, function(evt) {
+				console.log('failed to load buffer');
+				console.log(evt);
+			});
 		}
 		request.send();
 
